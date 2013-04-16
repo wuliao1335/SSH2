@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+<property name="url" value="jdbc:mysql://localhost:3306/ssh"></property>
+<property name="username" value="root"></property>
+<property name="password" value="root"></property>
+<property name="maxActive" value="100"></property>
+<property name="maxIdle" value="30"></property>
+<property name="maxWait" value="500"></property>
+<property name="defaultAutoCommit" value="true"></property>
+</bean>
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+<property name="dataSource" ref="dataSource"></property>
+<property name="hibernateProperties">
+<props>
+<prop key="connection.useUnicode">true</prop>
+			<prop key="connection.characterEncoding">utf-8</prop>
+<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+<prop key="hibernate.show-sql">true</prop>
+</props>
+</property>
+<property name="mappingResources">
+<list>
+<value>com/test/bean/User.hbm.xml</value>
+<value>com/test/bean/Admin.hbm.xml</value>
+</list>
+</property>
+</bean>
+
+<!-- DAO -->
+  <bean id="adminDao" class="com.test.dao.impl.AdminDaoImpl">
+   <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+  <!-- Services -->
+  <bean id="adminService" class="com.test.service.impl.AdminServiceImpl">
+    <property name="adminDao" ref="adminDao" />    
+  </bean>
+  <!-- Actions -->
+  <bean id="adminManager" class="com.test.action.AdminManager" scope="prototype">
+    <property name="adminService" ref="adminService"></property>
+  </bean>
+  
+<bean id="userDao" class="com.test.dao.impl.UserDAOImpl">
+<property name="sessionFactory">
+<ref bean="sessionFactory"/>
+</property>
+</bean>
+
+<bean id="userService" class="com.test.service.impl.UserServiceImpl">
+<property name="userDao">
+<ref bean="userDao"/>
+</property>
+</bean>
+<bean id="saveuseraction" class="com.test.action.SaveUserAction">
+<property name="service" ref="userService"></property>
+</bean>
+
+<bean id="userlistaction" class="com.test.action.UserListAction">
+<property name="service" ref="userService"></property>
+</bean>
+</beans>
